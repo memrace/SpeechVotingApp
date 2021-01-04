@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/catalog_nav_graph"
+    app:startDestination="@id/catalogMainFragment">
+
+    <fragment
+        android:id="@+id/catalogMainFragment"
+        android:name="com.northis.speechvotingapp.view.catalog.CatalogMainFragment"
+        android:label="fragment_catalog_main"
+        tools:layout="@layout/fragment_catalog_main" >
+        <action
+            android:id="@+id/action_catalogMainFragment_to_catalogSpeechCreationFragment"
+            app:destination="@id/catalogSpeechCreationFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/catalogSpeechCreationFragment"
+        android:name="com.northis.speechvotingapp.view.catalog.CatalogSpeechCreationFragment"
+        android:label="fragment_catalog_speech_creation"
+        tools:layout="@layout/fragment_catalog_speech_creation" >
+        <action
+            android:id="@+id/action_catalogSpeechCreationFragment_to_catalogMainFragment"
+            app:destination="@id/catalogMainFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+</navigation>

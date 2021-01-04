@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/voting_nav_graph"
+    app:startDestination="@id/votingMainFragment">
+
+    <fragment
+        android:id="@+id/votingMainFragment"
+        android:name="com.northis.speechvotingapp.view.voting.VotingMainFragment"
+        android:label="fragment_voting_main"
+        tools:layout="@layout/fragment_voting_main" >
+        <action
+            android:id="@+id/action_votingMainFragment_to_votingDetailsFragment"
+            app:destination="@id/votingDetailsFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/votingDetailsFragment"
+        android:name="com.northis.speechvotingapp.view.voting.VotingDetailsFragment"
+        android:label="fragment_voting_details"
+        tools:layout="@layout/fragment_voting_details" >
+        <action
+            android:id="@+id/action_votingDetailsFragment_to_votingAddSpeechFragment"
+            app:destination="@id/votingAddSpeechFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_votingDetailsFragment_to_votingAddScheduleFragment"
+            app:destination="@id/votingAddScheduleFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_votingDetailsFragment_to_votingMainFragment"
+            app:destination="@id/votingMainFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/votingAddSpeechFragment"
+        android:name="com.northis.speechvotingapp.view.voting.VotingAddSpeechFragment"
+        android:label="fragment_voting_add_speech"
+        tools:layout="@layout/fragment_voting_add_speech" >
+        <action
+            android:id="@+id/action_votingAddSpeechFragment_to_votingDetailsFragment"
+            app:destination="@id/votingDetailsFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popUpTo="@id/votingMainFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/votingAddScheduleFragment"
+        android:name="com.northis.speechvotingapp.view.voting.VotingAddScheduleFragment"
+        android:label="fragment_voting_add_schedule"
+        tools:layout="@layout/fragment_voting_add_schedule" >
+        <action
+            android:id="@+id/action_votingAddScheduleFragment_to_votingDetailsFragment"
+            app:destination="@id/votingDetailsFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popUpTo="@id/votingMainFragment" />
+    </fragment>
+</navigation>
