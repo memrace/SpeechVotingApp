@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">SpeechVotingApp</string>
+    <string name="hello_voting_details">Hello_Voting_Details</string>
+    <string name="hello_voting_main">Hello_Voting_Main</string>
+    <string name="catalog_main">Catalog_Main</string>
+    <string name="speech_creation">Speech_Creation</string>
+    <string name="addschedule">AddSchedule</string>
+    <string name="addspeech">AddSpeech</string>
 </resources>
