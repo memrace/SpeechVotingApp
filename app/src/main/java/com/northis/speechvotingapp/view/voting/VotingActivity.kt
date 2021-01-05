@@ -5,15 +5,25 @@ import android.os.Bundle
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.northis.speechvotingapp.R
+import com.northis.speechvotingapp.databinding.ActivityVotingBinding
+import com.northis.speechvotingapp.view.ui.ActivityUIService
+
 
 class VotingActivity : AppCompatActivity() {
     // Инициализируем навигационный контроллер.
-    lateinit var navController: NavController
-
+    private lateinit var navController: NavController
+    // ViewBinding
+    private lateinit var mBinding: ActivityVotingBinding
+    private lateinit var activityUiService: ActivityUIService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_voting)
-        // Указываем ему ссылку на хост.
+        mBinding = ActivityVotingBinding.inflate(layoutInflater)
+        val view = mBinding.root
+        setContentView(view)
+        // Указываем ссылку на хост.
         navController = Navigation.findNavController(this, R.id.nav_voting)
+        activityUiService = ActivityUIService(this, mBinding.inclTopAppBar.topAppBar, mBinding.inclBottomNavigationBar.bottomNavigation, "Голосование", R.id.nav_voting)
+        activityUiService.setActivityUi()
     }
+
 }
