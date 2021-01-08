@@ -1,8 +1,7 @@
 package com.northis.speechvotingapp.view.schedule
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
+import androidx.appcompat.app.AppCompatActivity
 import com.northis.speechvotingapp.R
 import com.northis.speechvotingapp.databinding.ActivityScheduleBinding
 import com.northis.speechvotingapp.view.ui.ActivityUIService
@@ -15,7 +14,13 @@ class ScheduleActivity : AppCompatActivity() {
         mBinding = ActivityScheduleBinding.inflate(layoutInflater)
         val view = mBinding.root
         setContentView(view)
-        activityUiService = ActivityUIService(this, mBinding.inclTopAppBar.topAppBar, mBinding.inclBottomNavigationBar.bottomNavigation, "Расписание", R.id.nav_schedule)
+        activityUiService = ActivityUIService(
+            this,
+            mBinding.inclTopAppBar.topAppBar,
+            mBinding.inclBottomNavigationBar.bottomNavigation,
+            "Расписание",
+            R.id.nav_schedule
+        )
         activityUiService.setActivityUi()
     }
 }

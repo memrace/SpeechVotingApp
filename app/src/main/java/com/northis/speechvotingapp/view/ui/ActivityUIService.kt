@@ -4,18 +4,18 @@ import android.content.Intent
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.size
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.northis.speechvotingapp.R
 import com.northis.speechvotingapp.view.catalog.CatalogActivity
 import com.northis.speechvotingapp.view.schedule.ScheduleActivity
 import com.northis.speechvotingapp.view.voting.VotingActivity
 
-class ActivityUIService(private val activity: AppCompatActivity,
-                        private val toolbar: Toolbar?,
-                        private val navigation: BottomNavigationView,
-                        private val title: String,
-                        private val itemId: Int
+class ActivityUIService(
+    private val activity: AppCompatActivity,
+    private val toolbar: Toolbar?,
+    private val navigation: BottomNavigationView,
+    private val title: String,
+    private val itemId: Int
 ) {
 
 
@@ -38,15 +38,30 @@ class ActivityUIService(private val activity: AppCompatActivity,
         return BottomNavigationView.OnNavigationItemSelectedListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.nav_voting -> {
-                    activity.startActivity(Intent(activity.applicationContext, VotingActivity::class.java))
+                    activity.startActivity(
+                        Intent(
+                            activity.applicationContext,
+                            VotingActivity::class.java
+                        )
+                    )
                     true
                 }
                 R.id.nav_schedule -> {
-                    activity.startActivity(Intent(activity.applicationContext, ScheduleActivity::class.java))
+                    activity.startActivity(
+                        Intent(
+                            activity.applicationContext,
+                            ScheduleActivity::class.java
+                        )
+                    )
                     true
                 }
                 R.id.nav_catalog -> {
-                    activity.startActivity(Intent(activity.applicationContext, CatalogActivity::class.java))
+                    activity.startActivity(
+                        Intent(
+                            activity.applicationContext,
+                            CatalogActivity::class.java
+                        )
+                    )
                     true
                 }
                 else -> {

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Голосование"
+    <item
         android:id="@+id/nav_voting"
         android:enabled="true"
         android:icon="@drawable/ic_stop_24px"
+        android:title="Голосование"
 
         />
-    <item android:title="Расписание"
+    <item
         android:id="@+id/nav_schedule"
         android:enabled="true"
         android:icon="@drawable/ic_stop_24px"
-        />
-    <item android:title="Каталог"
+        android:title="Расписание" />
+    <item
         android:id="@+id/nav_catalog"
         android:enabled="true"
         android:icon="@drawable/ic_stop_24px"
-        />
+        android:title="Каталог" />
 </menu>
