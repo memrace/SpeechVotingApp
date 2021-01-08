@@ -9,7 +9,7 @@
         android:id="@+id/catalogMainFragment"
         android:name="com.northis.speechvotingapp.view.catalog.CatalogMainFragment"
         android:label="fragment_catalog_main"
-        tools:layout="@layout/fragment_catalog_main" >
+        tools:layout="@layout/fragment_catalog_main">
         <action
             android:id="@+id/action_catalogMainFragment_to_catalogSpeechCreationFragment"
             app:destination="@id/catalogSpeechCreationFragment"
@@ -20,7 +20,7 @@
         android:id="@+id/catalogSpeechCreationFragment"
         android:name="com.northis.speechvotingapp.view.catalog.CatalogSpeechCreationFragment"
         android:label="fragment_catalog_speech_creation"
-        tools:layout="@layout/fragment_catalog_speech_creation" >
+        tools:layout="@layout/fragment_catalog_speech_creation">
         <action
             android:id="@+id/action_catalogSpeechCreationFragment_to_catalogMainFragment"
             app:destination="@id/catalogMainFragment"

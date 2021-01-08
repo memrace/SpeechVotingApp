@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
 }
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -43,7 +45,9 @@ android {
 dependencies {
     // Add Dagger dependencies
     implementation "com.google.dagger:dagger:2.30.1"
-    annotationProcessor "com.google.dagger:dagger-compiler:2.30.1"
+    implementation "com.google.dagger:dagger-android:2.30.1"
+    kapt "com.google.dagger:dagger-compiler:2.30.1"
+    kapt "com.google.dagger:dagger-android-processor:2.30.1"
     implementation "androidx.security:security-crypto:1.1.0-alpha03"
     implementation "io.ktor:ktor-client-json-jvm:1.5.0"
     implementation "io.ktor:ktor-client-gson:$ktor_version"

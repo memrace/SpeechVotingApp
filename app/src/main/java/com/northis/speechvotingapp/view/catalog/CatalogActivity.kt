@@ -1,7 +1,7 @@
 package com.northis.speechvotingapp.view.catalog
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.northis.speechvotingapp.R
@@ -18,7 +18,13 @@ class CatalogActivity : AppCompatActivity() {
         val view = mBinding.root
         setContentView(view)
         navController = Navigation.findNavController(this, R.id.nav_catalog)
-        activityUiService = ActivityUIService(this, mBinding.inclTopAppBar.topAppBar, mBinding.inclBottomNavigationBar.bottomNavigation, "Каталог", R.id.nav_catalog)
+        activityUiService = ActivityUIService(
+            this,
+            mBinding.inclTopAppBar.topAppBar,
+            mBinding.inclBottomNavigationBar.bottomNavigation,
+            "Каталог",
+            R.id.nav_catalog
+        )
         activityUiService.setActivityUi()
     }
 }
