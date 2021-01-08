@@ -2,12 +2,15 @@ package com.northis.speechvotingapp.view.voting
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.northis.speechvotingapp.R
 import com.northis.speechvotingapp.databinding.ActivityVotingBinding
 import com.northis.speechvotingapp.view.authorization.AuthActivity
+import com.northis.speechvotingapp.view.catalog.CatalogActivity
 import com.northis.speechvotingapp.view.ui.ActivityUIService
 
 
@@ -34,7 +37,20 @@ class VotingActivity : AppCompatActivity() {
         )
         activityUiService.setActivityUi()
         mBinding.button.setOnClickListener {
-            startActivity(Intent(this, AuthActivity::class.java))
+            startActivityForResult(Intent(this, AuthActivity::class.java), 1)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1) {
+            if (resultCode == -1) {
+                with(Toast.makeText(this, "Добро пожаловать!", Toast.LENGTH_SHORT)) {
+                    show()
+                }
+            }
+        } else {
+
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 

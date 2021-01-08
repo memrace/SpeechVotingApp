@@ -1,7 +1,10 @@
 package com.northis.speechvotingapp.authentication
 
 
+import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.util.Log
@@ -10,10 +13,12 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.northis.speechvotingapp.view.voting.VotingActivity
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -24,24 +29,23 @@ import javax.inject.Inject
 class AuthorizationService @Inject constructor(
     private val context: Context,
     private val userTokenStorage: IUserTokenStorage,
-    private val oauthSettingsProvide: IOAuthSettingsProvider,
+    private val oauthSettingsProvider: IOAuthSettingsProvider,
     private val client: HttpClient
 ) {
-
     // Создаем и проверяем в ответе для избежания CSRF атак.
     private val uniqueState = UUID.randomUUID().toString()
 
     private lateinit var responseCode: String;
 
     // Подготавливаем URL
-    private val uri = Uri.parse(oauthSettingsProvide.authUrl)
+    private val uri = Uri.parse(oauthSettingsProvider.authUrl)
         .buildUpon()
-        .appendQueryParameter("client_id", oauthSettingsProvide.clientId)
+        .appendQueryParameter("client_id", oauthSettingsProvider.clientId)
         .appendQueryParameter("code_challenge_method", "S256")
-        .appendQueryParameter("code_challenge", oauthSettingsProvide.codeChallenge)
-        .appendQueryParameter("redirect_uri", oauthSettingsProvide.redirectUri)
-        .appendQueryParameter("response_type", oauthSettingsProvide.responseType)
-        .appendQueryParameter("scope", oauthSettingsProvide.scope)
+        .appendQueryParameter("code_challenge", oauthSettingsProvider.codeChallenge)
+        .appendQueryParameter("redirect_uri", oauthSettingsProvider.redirectUri)
+        .appendQueryParameter("response_type", oauthSettingsProvider.responseType)
+        .appendQueryParameter("scope", oauthSettingsProvider.scope)
         .appendQueryParameter("state", uniqueState)
         .build()
 
@@ -56,14 +60,19 @@ class AuthorizationService @Inject constructor(
         }
     }
 
+    fun returnResult(act: Activity) {
+        act.setResult(RESULT_OK, Intent(context, VotingActivity::class.java))
+        act.finish()
+    }
+
     private suspend fun refreshToken() = coroutineScope {
         val refreshToken = userTokenStorage.getRefreshToken(context)
         if (refreshToken != null) {
-            val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvide.tokenUrl) {
+            val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvider.tokenUrl) {
                 body = FormDataContent(Parameters.build {
-                    append("client_id", oauthSettingsProvide.clientId)
-                    append("client_secret", oauthSettingsProvide.clientSecret)
-                    append("grant_type", oauthSettingsProvide.grantTypeRefresh)
+                    append("client_id", oauthSettingsProvider.clientId)
+                    append("client_secret", oauthSettingsProvider.clientSecret)
+                    append("grant_type", oauthSettingsProvider.grantTypeRefresh)
                     append("refresh_token", refreshToken)
                 })
             }
@@ -77,23 +86,24 @@ class AuthorizationService @Inject constructor(
 
     }
 
-    fun beginAuthentication(webView: WebView) {
+    fun startAuthentication(webView: WebView, callback: OnTokenAcquiredListener) {
         webView.settings.javaScriptEnabled = true
         // TODO Убрать когда будут сертификаты.
         webView.webViewClient = WvClient()
         webView.loadUrl(uri.toString())
         Log.d("Request Access Token", "Запрос на получение токена.")
+        callback.onTokenAcquired()
     }
 
     private suspend fun getOAuthData() = coroutineScope {
-        val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvide.tokenUrl) {
+        val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvider.tokenUrl) {
             body = FormDataContent(Parameters.build {
-                append("client_id", oauthSettingsProvide.clientId)
-                append("client_secret", oauthSettingsProvide.clientSecret)
+                append("client_id", oauthSettingsProvider.clientId)
+                append("client_secret", oauthSettingsProvider.clientSecret)
                 append("code", responseCode)
-                append("grant_type", oauthSettingsProvide.grantType)
-                append("redirect_uri", oauthSettingsProvide.redirectUri)
-                append("code_verifier", oauthSettingsProvide.codeVerifier)
+                append("grant_type", oauthSettingsProvider.grantType)
+                append("redirect_uri", oauthSettingsProvider.redirectUri)
+                append("code_verifier", oauthSettingsProvider.codeVerifier)
             })
         }
         client.close()
@@ -121,7 +131,7 @@ class AuthorizationService @Inject constructor(
         ): Boolean {
             view?.clearCache(true)
             request?.let {
-                if (request.url.toString().startsWith(oauthSettingsProvide.redirectUri)) {
+                if (request.url.toString().startsWith(oauthSettingsProvider.redirectUri)) {
                     var responseState = request.url.getQueryParameter("state")
                     if (responseState == uniqueState) {
                         request?.url.getQueryParameter("code")?.let { code ->

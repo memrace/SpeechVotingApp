@@ -1,15 +1,31 @@
 package com.northis.speechvotingapp.authentication
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import java.util.*
 
 interface IUserTokenStorage {
+    fun getStorage(context: Context): SharedPreferences {
+        val mainKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        val sharedPrefsFile: String = StorageValuesEnum.USER_META_DATA.toString()
+        return EncryptedSharedPreferences.create(
+            context,
+            sharedPrefsFile,
+            mainKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
+
     fun saveToken(context: Context, accessToken: String, idToken: String?, refreshToken: String?)
     fun getAccessToken(context: Context): String?
     fun getRefreshToken(context: Context): String?
     fun setExpirationDate(context: Context, expiresIn: Int)
     fun isExpired(context: Context): Boolean
-
 
     companion object {
         val instance: IUserTokenStorage by lazy {
@@ -20,10 +36,7 @@ interface IUserTokenStorage {
                     idToken: String?,
                     refreshToken: String?
                 ) {
-                    val sharedPreferences = context.getSharedPreferences(
-                        StorageValuesEnum.USER_META_DATA.toString(),
-                        Context.MODE_PRIVATE
-                    )
+                    val sharedPreferences = getStorage(context)
                     with(sharedPreferences.edit()) {
                         putString(StorageValuesEnum.ACCESS_TOKEN.toString(), accessToken)
                         putString(StorageValuesEnum.ID_TOKEN.toString(), idToken)
@@ -33,10 +46,7 @@ interface IUserTokenStorage {
                 }
 
                 override fun getAccessToken(context: Context): String? {
-                    val sharedPreferences = context.getSharedPreferences(
-                        StorageValuesEnum.USER_META_DATA.toString(),
-                        Context.MODE_PRIVATE
-                    )
+                    val sharedPreferences = getStorage(context)
                     return sharedPreferences.getString(
                         StorageValuesEnum.ACCESS_TOKEN.toString(),
                         ""
@@ -44,10 +54,7 @@ interface IUserTokenStorage {
                 }
 
                 override fun getRefreshToken(context: Context): String? {
-                    val sharedPreferences = context.getSharedPreferences(
-                        StorageValuesEnum.USER_META_DATA.toString(),
-                        Context.MODE_PRIVATE
-                    )
+                    val sharedPreferences = getStorage(context)
                     return sharedPreferences.getString(
                         StorageValuesEnum.REFRESH_TOKEN.toString(),
                         ""
@@ -55,10 +62,7 @@ interface IUserTokenStorage {
                 }
 
                 override fun setExpirationDate(context: Context, expiresIn: Int) {
-                    val sharedPreferences = context.getSharedPreferences(
-                        StorageValuesEnum.USER_META_DATA.toString(),
-                        Context.MODE_PRIVATE
-                    )
+                    val sharedPreferences = getStorage(context)
                     val dateNow = Date().time
                     val expiresDate = dateNow + expiresIn.toLong()
                     sharedPreferences.edit()
@@ -66,10 +70,7 @@ interface IUserTokenStorage {
                 }
 
                 override fun isExpired(context: Context): Boolean {
-                    val sharedPreferences = context.getSharedPreferences(
-                        StorageValuesEnum.USER_META_DATA.toString(),
-                        Context.MODE_PRIVATE
-                    )
+                    val sharedPreferences = getStorage(context)
                     val dateNow = Date().time
                     return dateNow <= sharedPreferences.getLong(
                         StorageValuesEnum.EXPIRATION_DATE.toString(),

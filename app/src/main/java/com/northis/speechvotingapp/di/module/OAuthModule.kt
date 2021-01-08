@@ -1,7 +1,9 @@
 package com.northis.speechvotingapp.di.module
 
+import android.app.Activity
 import android.content.Context
 import com.northis.speechvotingapp.authentication.IOAuthSettingsProvider
+import com.northis.speechvotingapp.authentication.IOAuthSettingsProvider.Companion.instance
 import com.northis.speechvotingapp.authentication.IUserTokenStorage
 import dagger.Module
 import dagger.Provides
@@ -11,7 +13,7 @@ import javax.inject.Singleton
 @Module
 class OAuthModule(
     private val context: Context,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
 
     @Provides
@@ -35,6 +37,6 @@ class OAuthModule(
     @Provides
     @Singleton
     fun provideOAuthSettings(): IOAuthSettingsProvider {
-        return IOAuthSettingsProvider.instance
+        return instance
     }
 }
