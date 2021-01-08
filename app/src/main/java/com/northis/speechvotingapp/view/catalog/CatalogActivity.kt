@@ -9,8 +9,8 @@ import com.northis.speechvotingapp.databinding.ActivityCatalogBinding
 import com.northis.speechvotingapp.view.ui.ActivityUIService
 
 class CatalogActivity : AppCompatActivity() {
-    lateinit var mBinding: ActivityCatalogBinding
-    lateinit var navController: NavController
+    private lateinit var mBinding: ActivityCatalogBinding
+    private lateinit var navController: NavController
     private lateinit var activityUiService: ActivityUIService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

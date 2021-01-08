@@ -10,7 +10,6 @@ import io.ktor.client.features.json.*
 
 
 class App : Application() {
-
     lateinit var oauthComponent: OAuthComponent
     override fun onCreate() {
         super.onCreate()
