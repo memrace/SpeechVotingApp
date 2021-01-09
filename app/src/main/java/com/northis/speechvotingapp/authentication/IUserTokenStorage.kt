@@ -2,6 +2,7 @@ package com.northis.speechvotingapp.authentication
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.util.*
@@ -47,6 +48,7 @@ interface IUserTokenStorage {
 
                 override fun getAccessToken(context: Context): String? {
                     val sharedPreferences = getStorage(context)
+                    Log.d("Token request", "Токен получен!")
                     return sharedPreferences.getString(
                         StorageValuesEnum.ACCESS_TOKEN.toString(),
                         ""

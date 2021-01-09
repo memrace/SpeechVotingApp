@@ -1,10 +1,7 @@
 package com.northis.speechvotingapp.authentication
 
 
-import android.app.Activity
-import android.app.Activity.RESULT_OK
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.util.Log
@@ -13,12 +10,10 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.northis.speechvotingapp.view.voting.VotingActivity
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -58,11 +53,6 @@ class AuthorizationService @Inject constructor(
         } else {
             userTokenStorage.getAccessToken(context)
         }
-    }
-
-    fun returnResult(act: Activity) {
-        act.setResult(RESULT_OK, Intent(context, VotingActivity::class.java))
-        act.finish()
     }
 
     private suspend fun refreshToken() = coroutineScope {
