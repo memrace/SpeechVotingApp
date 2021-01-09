@@ -3,7 +3,6 @@ package com.northis.speechvotingapp.view.voting
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
@@ -15,10 +14,6 @@ import com.northis.speechvotingapp.model.User
 import com.northis.speechvotingapp.network.IUserService
 import com.northis.speechvotingapp.view.authorization.AuthActivity
 import com.northis.speechvotingapp.view.ui.ActivityUIService
-import io.ktor.client.*
-import io.ktor.client.request.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,8 +26,7 @@ class VotingActivity : AppCompatActivity() {
 
     @Inject
     internal lateinit var userService: IUserService
-    @Inject
-    internal lateinit var client: HttpClient
+
     // ViewBinding
     private lateinit var mBinding: ActivityVotingBinding
     private lateinit var activityUiService: ActivityUIService
@@ -57,9 +51,7 @@ class VotingActivity : AppCompatActivity() {
             startActivityForResult(Intent(this, AuthActivity::class.java), 1)
         }
         mBinding.button2.setOnClickListener {
-
-                test()
-
+            test()
         }
 
     }
@@ -76,9 +68,9 @@ class VotingActivity : AppCompatActivity() {
         }
     }
 
-     fun test(){
+    fun test() {
         val call = userService.getUsers()
-        call.enqueue(object :Callback<Array<User>>{
+        call.enqueue(object : Callback<Array<User>> {
             override fun onFailure(call: Call<Array<User>>, t: Throwable) {
                 t.message?.let { Log.d("problem", it) }
             }
@@ -87,8 +79,10 @@ class VotingActivity : AppCompatActivity() {
                 call: Call<Array<User>>,
                 response: Response<Array<User>>
             ) {
-                val users = response.body() as Array<User>
-                Log.d("Got it!", users[0].Email)
+                val users = response.body()
+                if (users != null) {
+                    Log.d("USER", users[0].Email)
+                }
 
             }
         })

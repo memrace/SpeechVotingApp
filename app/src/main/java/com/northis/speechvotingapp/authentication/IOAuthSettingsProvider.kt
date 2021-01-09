@@ -24,7 +24,7 @@ interface IOAuthSettingsProvider {
                 override val authUrl: String
                     get() = "https://192.168.100.8:5001/connect/authorize"
                 override val tokenUrl: String
-                    get() = "https://192.168.100.8:5001/connect/token"
+                    get() = "https://192.168.100.8:5001/connect/"
                 override val clientId: String
                     get() = "SpeechVotingAndroid"
                 override val clientSecret: String

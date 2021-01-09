@@ -5,13 +5,10 @@ import com.northis.speechvotingapp.authentication.IOAuthSettingsProvider.Compani
 import com.northis.speechvotingapp.authentication.IUserTokenStorage
 import dagger.Module
 import dagger.Provides
-import io.ktor.client.*
 import javax.inject.Singleton
 
 @Module
-class OAuthModule(
-    private val httpClient: HttpClient
-) {
+class OAuthModule() {
     @Provides
     @Singleton
     fun provideUserTokenStorage(): IUserTokenStorage {
@@ -20,13 +17,8 @@ class OAuthModule(
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return httpClient;
-    }
-
-    @Provides
-    @Singleton
     fun provideOAuthSettings(): IOAuthSettingsProvider {
         return instance
     }
+
 }

@@ -24,6 +24,9 @@ class AuthActivity : AppCompatActivity(), OnTokenAcquiredListener {
         setContentView(view)
         (applicationContext as App).oauthComponent.inject(this)
         mBinding.loginBtn.setOnClickListener {
+            mBinding.loginBtn.visibility = View.GONE
+            mBinding.textView.visibility = View.GONE
+            mBinding.textView2.visibility = View.GONE
             mBinding.authView.visibility = View.VISIBLE
             authServe.startAuthentication(mBinding.authView, this)
         }

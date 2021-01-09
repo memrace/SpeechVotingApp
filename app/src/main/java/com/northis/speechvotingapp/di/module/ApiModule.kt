@@ -1,16 +1,16 @@
 package com.northis.speechvotingapp.di.module
 
 import android.app.Application
-import android.content.Context
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.northis.speechvotingapp.authentication.IUserTokenStorage
+import com.northis.speechvotingapp.authentication.AuthorizationService
 import com.northis.speechvotingapp.authentication.UnsafeConnection
+import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IUserService
+import com.northis.speechvotingapp.network.IVotingService
 import dagger.Module
 import dagger.Provides
-import io.ktor.client.*
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -23,7 +23,6 @@ import javax.net.ssl.X509TrustManager
 @Module
 class ApiModule(private val baseUrl: String) {
     @Provides
-    @Singleton
     fun provideHttpCache(application: Application): Cache? {
         val cacheSize = 10 * 1024 * 1024
         return Cache(application.cacheDir, cacheSize.toLong())
@@ -36,27 +35,32 @@ class ApiModule(private val baseUrl: String) {
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
         return gsonBuilder.create()
     }
+
     @Provides
     @Singleton
-    fun provideInterceptor(storage: IUserTokenStorage, context: Context): Interceptor {
-        return Interceptor { chain ->
-            val request = chain.request()
-            val newRequest = request
-                .newBuilder()
-                .addHeader("Authorization", "Bearer ${storage.getAccessToken(context)}")
-                .build()
-            return@Interceptor chain.proceed(newRequest)
-        }
-    }
-    @Provides
-    @Singleton
-    fun provideOkhttpClient(cache: Cache?, interceptor: Interceptor): OkHttpClient {
+    fun provideOkhttpClient(
+        cache: Cache?,
+        authService: AuthorizationService
+    ): OkHttpClient {
         val client = OkHttpClient.Builder()
-        with(client){
-            sslSocketFactory(UnsafeConnection.getSslSocketFactory(), UnsafeConnection.getTrustAllCerts()[0] as X509TrustManager)
+        with(client) {
+            sslSocketFactory(
+                UnsafeConnection.getSslSocketFactory(),
+                UnsafeConnection.getTrustAllCerts()[0] as X509TrustManager
+            )
             hostnameVerifier { _, _ -> true }
             cache(cache)
-            addInterceptor(interceptor)
+            addInterceptor(Interceptor { chain ->
+                val request = chain.request()
+                val newRequest = request
+                    .newBuilder()
+                    .addHeader(
+                        "Authorization",
+                        "Bearer ${authService.getAccessToken()}"
+                    )
+                    .build()
+                return@Interceptor chain.proceed(newRequest)
+            })
         }
         return client.build()
     }
@@ -70,10 +74,23 @@ class ApiModule(private val baseUrl: String) {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
+
     @Provides
     @Singleton
-    fun provideUserApi(retrofit: Retrofit): IUserService{
+    fun provideUserApi(retrofit: Retrofit): IUserService {
         return retrofit.create(IUserService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVotingApi(retrofit: Retrofit): IVotingService {
+        return retrofit.create(IVotingService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogApi(retrofit: Retrofit): ICatalogService {
+        return retrofit.create(ICatalogService::class.java)
     }
 
 }

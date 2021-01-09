@@ -48,7 +48,7 @@ interface IUserTokenStorage {
 
                 override fun getAccessToken(context: Context): String? {
                     val sharedPreferences = getStorage(context)
-                    Log.d("Token request", "Токен получен!")
+                    Log.d("Token request", "Токен из хранилища получен! ${sharedPreferences.getString(StorageValuesEnum.ACCESS_TOKEN.toString(), "")}")
                     return sharedPreferences.getString(
                         StorageValuesEnum.ACCESS_TOKEN.toString(),
                         ""

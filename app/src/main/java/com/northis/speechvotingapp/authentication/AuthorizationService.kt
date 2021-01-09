@@ -10,23 +10,30 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
+import com.google.gson.FieldNamingPolicy
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import javax.inject.Inject
+import javax.net.ssl.X509TrustManager
 
 
 class AuthorizationService @Inject constructor(
     private val context: Context,
     private val userTokenStorage: IUserTokenStorage,
-    private val oauthSettingsProvider: IOAuthSettingsProvider,
-    private val client: HttpClient
+    private val oauthSettingsProvider: IOAuthSettingsProvider
 ) {
+
+    //CallBack
+    private lateinit var callback: OnTokenAcquiredListener
+
     // Создаем и проверяем в ответе для избежания CSRF атак.
     private val uniqueState = UUID.randomUUID().toString()
 
@@ -44,9 +51,29 @@ class AuthorizationService @Inject constructor(
         .appendQueryParameter("state", uniqueState)
         .build()
 
+
+    private fun getAuthApi(): IAuthService {
+        val gsonBuilder = GsonBuilder()
+        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        val client = OkHttpClient.Builder()
+        with(client) {
+            sslSocketFactory(
+                UnsafeConnection.getSslSocketFactory(),
+                UnsafeConnection.getTrustAllCerts()[0] as X509TrustManager
+            )
+            hostnameVerifier { _, _ -> true }
+        }
+        val retrofit = Retrofit.Builder()
+            .baseUrl(oauthSettingsProvider.tokenUrl)
+            .client(client.build())
+            .addConverterFactory(GsonConverterFactory.create(gsonBuilder.create()))
+            .build()
+        return retrofit.create(IAuthService::class.java)
+    }
+
     fun getAccessToken(): String? {
         return if (userTokenStorage.isExpired(context)) {
-            GlobalScope.launch {
+            GlobalScope.async {
                 refreshToken()
             }
             userTokenStorage.getAccessToken(context)
@@ -55,53 +82,88 @@ class AuthorizationService @Inject constructor(
         }
     }
 
-    private suspend fun refreshToken() = coroutineScope {
+    private fun refreshToken() {
         val refreshToken = userTokenStorage.getRefreshToken(context)
         if (refreshToken != null) {
-            val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvider.tokenUrl) {
-                body = FormDataContent(Parameters.build {
-                    append("client_id", oauthSettingsProvider.clientId)
-                    append("client_secret", oauthSettingsProvider.clientSecret)
-                    append("grant_type", oauthSettingsProvider.grantTypeRefresh)
-                    append("refresh_token", refreshToken)
-                })
-            }
-            client.close()
-            with(userTokenStorage) {
-                saveToken(context, data.accessToken, data.idToken, data.refreshToken)
-                data.expiresInSeconds?.let { setExpirationDate(context, it) }
-            }
-            Log.d("success", "Токены обновлены и сохранены!")
+            val call = getAuthApi().refreshToken(
+                oauthSettingsProvider.clientId,
+                oauthSettingsProvider.clientSecret,
+                oauthSettingsProvider.grantTypeRefresh,
+                refreshToken
+            )
+            call.enqueue(object : Callback<OAuthAccessTokenResponse> {
+                override fun onResponse(
+                    call: Call<OAuthAccessTokenResponse>,
+                    response: Response<OAuthAccessTokenResponse>
+                ) {
+                    val data = response.body()
+                    if (data != null) {
+                        with(userTokenStorage) {
+                            saveToken(context, data.access_token, data.id_token, data.refresh_token)
+                            data.expires_in?.let { setExpirationDate(context, it) }
+                        }
+                        Log.d(
+                            "success",
+                            "Токены обновлены и сохранены! ${data.access_token} ; ${data.refresh_token}"
+                        )
+                    }
+
+                }
+
+                override fun onFailure(call: Call<OAuthAccessTokenResponse>, t: Throwable) {
+                    Log.d("error", "Ошибка!!!")
+                }
+
+            })
         }
 
     }
 
     fun startAuthentication(webView: WebView, callback: OnTokenAcquiredListener) {
+        this.callback = callback
         webView.settings.javaScriptEnabled = true
         // TODO Убрать когда будут сертификаты.
         webView.webViewClient = WvClient()
+        webView.settings.useWideViewPort = true
         webView.loadUrl(uri.toString())
         Log.d("Request Access Token", "Запрос на получение токена.")
-        callback.onTokenAcquired()
     }
 
-    private suspend fun getOAuthData() = coroutineScope {
-        val data = client.post<OAuthAccessTokenResponse>(oauthSettingsProvider.tokenUrl) {
-            body = FormDataContent(Parameters.build {
-                append("client_id", oauthSettingsProvider.clientId)
-                append("client_secret", oauthSettingsProvider.clientSecret)
-                append("code", responseCode)
-                append("grant_type", oauthSettingsProvider.grantType)
-                append("redirect_uri", oauthSettingsProvider.redirectUri)
-                append("code_verifier", oauthSettingsProvider.codeVerifier)
-            })
-        }
-        client.close()
-        with(userTokenStorage) {
-            saveToken(context, data.accessToken, data.idToken, data.refreshToken)
-            data.expiresInSeconds?.let { setExpirationDate(context, it) }
-        }
-        Log.d("success", "Токены получены и сохранены!")
+    private fun getOAuthData() {
+        val call = getAuthApi().getToken(
+            oauthSettingsProvider.clientId,
+            oauthSettingsProvider.clientSecret,
+            responseCode,
+            oauthSettingsProvider.grantType,
+            oauthSettingsProvider.redirectUri,
+            oauthSettingsProvider.codeVerifier
+        )
+        call.enqueue(object : Callback<OAuthAccessTokenResponse> {
+            override fun onResponse(
+                call: Call<OAuthAccessTokenResponse>,
+                response: Response<OAuthAccessTokenResponse>
+            ) {
+                val data = response.body()
+                with(userTokenStorage) {
+                    if (data != null) {
+                        saveToken(context, data.access_token, data.id_token, data.refresh_token)
+                        data.expires_in?.let {
+                            setExpirationDate(context, it)
+                        }
+                        Log.d(
+                            "success",
+                            "Токены получены и сохранены! ${data.access_token} ; ${data.refresh_token}"
+                        )
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<OAuthAccessTokenResponse>, t: Throwable) {
+                Log.d("error", "Ошибка!!!")
+            }
+
+        })
+
     }
 
     private inner class WvClient : WebViewClient() {
@@ -112,7 +174,6 @@ class AuthorizationService @Inject constructor(
             error: SslError?
         ) {
             handler?.proceed()
-            super.onReceivedSslError(view, handler, error)
         }
 
         override fun shouldOverrideUrlLoading(
@@ -131,17 +192,15 @@ class AuthorizationService @Inject constructor(
                             )
                             responseCode = code
                             view?.visibility = View.GONE
-                            GlobalScope.launch {
-                                getOAuthData()
-                            }
+                            Log.d("code", responseCode)
+                            getOAuthData()
+                            callback.onTokenAcquired()
                         } ?: run {
-                            // Пользователь сбросил авторизацию.
-                            // TODO Обработку ошибок.
+                            Log.d("problems", "что-то пошло не так.")
                         }
                     }
                 }
             }
-
             return super.shouldOverrideUrlLoading(view, request)
         }
     }
