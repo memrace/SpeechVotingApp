@@ -50,10 +50,6 @@ class VotingActivity : AppCompatActivity() {
         mBinding.button.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), 1)
         }
-        mBinding.button2.setOnClickListener {
-            test()
-        }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -68,24 +64,5 @@ class VotingActivity : AppCompatActivity() {
         }
     }
 
-    fun test() {
-        val call = userService.getUsers()
-        call.enqueue(object : Callback<Array<User>> {
-            override fun onFailure(call: Call<Array<User>>, t: Throwable) {
-                t.message?.let { Log.d("problem", it) }
-            }
-
-            override fun onResponse(
-                call: Call<Array<User>>,
-                response: Response<Array<User>>
-            ) {
-                val users = response.body()
-                if (users != null) {
-                    Log.d("USER", users[0].Email)
-                }
-
-            }
-        })
-    }
 
 }
