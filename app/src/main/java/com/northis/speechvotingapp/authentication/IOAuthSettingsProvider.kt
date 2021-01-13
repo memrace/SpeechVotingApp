@@ -22,9 +22,9 @@ interface IOAuthSettingsProvider {
         val instance: IOAuthSettingsProvider by lazy {
             object : IOAuthSettingsProvider {
                 override val authUrl: String
-                    get() = "http://192.168.100.8:5001/connect/authorize"
+                    get() = "https://192.168.100.8:5001/connect/authorize"
                 override val tokenUrl: String
-                    get() = "http://192.168.100.8:5001/connect/token"
+                    get() = "https://192.168.100.8:5001/connect/"
                 override val clientId: String
                     get() = "SpeechVotingAndroid"
                 override val clientSecret: String
