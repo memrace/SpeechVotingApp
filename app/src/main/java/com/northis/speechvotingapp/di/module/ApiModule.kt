@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder
 import com.northis.speechvotingapp.authentication.AuthorizationService
 import com.northis.speechvotingapp.authentication.UnsafeConnection
 import com.northis.speechvotingapp.network.ICatalogService
-import com.northis.speechvotingapp.network.IUserService
+import com.northis.speechvotingapp.network.IProfileService
 import com.northis.speechvotingapp.network.IVotingService
 import dagger.Module
 import dagger.Provides
@@ -77,8 +77,8 @@ class ApiModule(private val baseUrl: String) {
 
     @Provides
     @Singleton
-    fun provideUserApi(retrofit: Retrofit): IUserService {
-        return retrofit.create(IUserService::class.java)
+    fun provideUserApi(retrofit: Retrofit): IProfileService {
+        return retrofit.create(IProfileService::class.java)
     }
 
     @Provides

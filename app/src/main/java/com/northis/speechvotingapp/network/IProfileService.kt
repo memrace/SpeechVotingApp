@@ -1,21 +1,21 @@
 package com.northis.speechvotingapp.network
 
 import com.northis.speechvotingapp.model.User
-import retrofit2.Call
+import kotlinx.coroutines.Deferred
 import retrofit2.http.*
 
 private const val SERVICE = "profiles/"
 private const val ARRAY = "array/"
 
-interface IUserService {
+interface IProfileService {
     @GET("$SERVICE{uuid}")
     fun getUser(
         @Path("uuid") uuid: String
-    ): Call<User>
+    ): Deferred<User>
 
     @GET(SERVICE)
-    fun getUsers(): Call<Array<User>>
+    fun getUsers(): Deferred<Array<User>>
 
     @POST("$SERVICE$ARRAY")
-    fun getUsersArray(@Body arrayId: Array<String>): Call<Array<User>>
+    fun getUsersArray(@Body arrayId: Array<String>): Deferred<Array<User>>
 }

@@ -1,7 +1,7 @@
 package com.northis.speechvotingapp.network
 
 import com.northis.speechvotingapp.model.Speech
-import retrofit2.Call
+import kotlinx.coroutines.Deferred
 import retrofit2.http.*
 import java.util.*
 
@@ -14,7 +14,7 @@ interface ICatalogService {
 
 
     @GET("$SERVICE$SPEECH{uuid}")
-    fun getSpeech(@Path("uuid") uuid: String): Call<Speech>
+    fun getSpeech(@Path("uuid") uuid: String): Deferred<Speech>
 
     @GET("$SERVICE$SPEECH")
     fun getSpeeches(
@@ -28,10 +28,10 @@ interface ICatalogService {
         @Query("executor") executorId: String?,
         @Query("creator") creatorId: String?,
         @Query("theme") theme: String?
-    ): Call<Array<Speech>>
+    ): Deferred<Array<Speech>>
 
     @POST("$SERVICE$SPEECH$ARRAY")
-    fun getSpeechesArray(@Body arrayId: Array<String>): Call<Array<Speech>>
+    fun getSpeechesArray(@Body arrayId: Array<String>): Deferred<Array<Speech>>
 
     @Multipart
     @PATCH("$SERVICE$SPEECH{uuid}/executor")
@@ -39,22 +39,22 @@ interface ICatalogService {
         @Path("uuid") uuid: String,
         @Part("ExecutorId") executorId: String,
         @Part("SpeechDate") speechDate: Date
-    )
+    ): Deferred<Unit>
 
     @POST("$SERVICE$SPEECH")
-    fun createSpeech(@Body speech: Speech): Call<Speech>
+    fun createSpeech(@Body speech: Speech): Deferred<Speech>
 
     @POST("$SERVICE$SPEECH$CALENDAR")
-    fun createSpeechInCalendar(@Body speech: Speech): Call<Speech>
+    fun createSpeechInCalendar(@Body speech: Speech): Deferred<Speech>
 
     @DELETE("$SERVICE$SPEECH{uuid}")
-    fun deleteSpeech(@Path("uuid") speechId: String)
+    fun deleteSpeech(@Path("uuid") speechId: String): Deferred<Unit>
 
     @GET("$SERVICE$CALENDAR")
     fun getCalendarSpeeches(
         @Query("minEndDate") minEndDate: Date,
         @Query("maxEndDate") maxEndDate: Date
-    ): Call<Array<Speech>>
+    ): Deferred<Array<Speech>>
 
     @Multipart
     @PATCH("$SERVICE$SPEECH/{uuid}")
@@ -62,6 +62,6 @@ interface ICatalogService {
         @Path("uuid") speechId: String,
         @Part("Description") description: String,
         @Part("Theme") theme: String
-    )
+    ): Deferred<Unit>
 
 }

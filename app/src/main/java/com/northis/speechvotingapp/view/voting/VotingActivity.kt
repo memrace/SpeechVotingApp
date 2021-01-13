@@ -2,30 +2,25 @@ package com.northis.speechvotingapp.view.voting
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.northis.speechvotingapp.R
 import com.northis.speechvotingapp.databinding.ActivityVotingBinding
 import com.northis.speechvotingapp.di.App
-import com.northis.speechvotingapp.model.User
-import com.northis.speechvotingapp.network.IUserService
 import com.northis.speechvotingapp.view.authorization.AuthActivity
 import com.northis.speechvotingapp.view.ui.ActivityUIService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import javax.inject.Inject
+import com.northis.speechvotingapp.viewmodel.VotingViewModel
 
 
 class VotingActivity : AppCompatActivity() {
+    private val votingViewModel: VotingViewModel by viewModels()
+
     // Инициализируем навигационный контроллер.
     private lateinit var navController: NavController
-
-    @Inject
-    internal lateinit var userService: IUserService
 
     // ViewBinding
     private lateinit var mBinding: ActivityVotingBinding
@@ -64,5 +59,19 @@ class VotingActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        votingViewModel.votingListLiveData.observe(this, Observer { })
+        votingViewModel.votingLiveData.observe(this, Observer { })
+        votingViewModel.winnerLiveData.observe(this, Observer { })
+    }
+
+    private fun getVoting(votingId: String) {
+        votingViewModel.loadVoting(votingId)
+    }
+
+    private fun getWinner(votingId: String) {
+        votingViewModel.loadWinner(votingId)
+    }
 
 }
