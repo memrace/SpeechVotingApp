@@ -2,10 +2,10 @@ package com.northis.speechvotingapp.view.voting
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.northis.speechvotingapp.R
@@ -14,10 +14,16 @@ import com.northis.speechvotingapp.di.App
 import com.northis.speechvotingapp.view.authorization.AuthActivity
 import com.northis.speechvotingapp.view.ui.ActivityUIService
 import com.northis.speechvotingapp.viewmodel.VotingViewModel
+import com.northis.speechvotingapp.viewmodel.VotingViewModelFactory
+import javax.inject.Inject
+import kotlin.math.log
 
 
 class VotingActivity : AppCompatActivity() {
-    private val votingViewModel: VotingViewModel by viewModels()
+    @Inject
+    internal lateinit var votingViewModelFactory: VotingViewModelFactory
+
+    private val votingViewModel: VotingViewModel by viewModels(factoryProducer = { votingViewModelFactory })
 
     // Инициализируем навигационный контроллер.
     private lateinit var navController: NavController
@@ -45,6 +51,7 @@ class VotingActivity : AppCompatActivity() {
         mBinding.button.setOnClickListener {
             startActivityForResult(Intent(this, AuthActivity::class.java), 1)
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -61,17 +68,8 @@ class VotingActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        votingViewModel.votingListLiveData.observe(this, Observer { })
-        votingViewModel.votingLiveData.observe(this, Observer { })
-        votingViewModel.winnerLiveData.observe(this, Observer { })
+        votingViewModel.getVotingList().observe(this, { Log.d("Data", "Voting List")})
     }
 
-    private fun getVoting(votingId: String) {
-        votingViewModel.loadVoting(votingId)
-    }
-
-    private fun getWinner(votingId: String) {
-        votingViewModel.loadWinner(votingId)
-    }
 
 }

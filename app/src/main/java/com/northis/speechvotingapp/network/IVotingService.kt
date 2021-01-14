@@ -3,7 +3,6 @@ package com.northis.speechvotingapp.network
 import com.northis.speechvotingapp.model.Speech
 import com.northis.speechvotingapp.model.UserVote
 import com.northis.speechvotingapp.model.Voting
-import kotlinx.coroutines.Deferred
 import retrofit2.http.*
 
 private const val SERVICE = "speechvoting/"
@@ -13,20 +12,20 @@ private const val WINNER = "winner/"
 
 interface IVotingService {
     @POST("$SERVICE$VOTING{uuid}/speeches")
-    fun addSpeechToVotingAsync(@Path("uuid") votingId: String, @Body speechId: String): Deferred<Unit>
+    suspend fun addSpeechToVoting(@Path("uuid") votingId: String, @Body speechId: String): Unit
 
     @POST("$SERVICE$VOTING{uuid}/$VOTE")
-    fun addVoteToSpeechAsync(@Path("uuid") votingId: String, @Body vote: UserVote): Deferred<Unit>
+    suspend fun addVoteToSpeech(@Path("uuid") votingId: String, @Body vote: UserVote): Unit
 
     @GET("$SERVICE$VOTING{uuid}")
-    fun getVotingAsync(@Path("uuid") votingId: String): Deferred<Voting>
+    suspend fun getVoting(@Path("uuid") votingId: String): Voting
 
     @GET("$SERVICE$VOTING")
-    fun getVotingListAsync(): Deferred<Array<Voting>>
+    suspend fun getVotingList(): Array<Voting>
 
     @DELETE("$SERVICE$VOTING/{uuid}$VOTE{userId}")
-    fun removeVoteAsync(@Path("uuid") votingId: String, @Path("userId") userId: String): Deferred<Unit>
+    suspend fun removeVote(@Path("uuid") votingId: String, @Path("userId") userId: String): Unit
 
     @GET("$SERVICE$VOTING{UUID}/$WINNER")
-    fun getWinnerAsync(@Path("uuid") votingId: String): Deferred<Speech>
+    suspend fun getWinner(@Path("uuid") votingId: String): Speech
 }

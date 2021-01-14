@@ -9,13 +9,13 @@ private const val ARRAY = "array/"
 
 interface IProfileService {
     @GET("$SERVICE{uuid}")
-    fun getUser(
+    suspend fun getUser(
         @Path("uuid") uuid: String
-    ): Deferred<User>
+    ): User
 
     @GET(SERVICE)
-    fun getUsers(): Deferred<Array<User>>
+    suspend fun getUsers(): Array<User>
 
     @POST("$SERVICE$ARRAY")
-    fun getUsersArray(@Body arrayId: Array<String>): Deferred<Array<User>>
+    suspend fun getUsersArray(@Body arrayId: Array<String>): Array<User>
 }
