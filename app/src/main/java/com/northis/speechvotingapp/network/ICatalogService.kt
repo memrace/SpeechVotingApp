@@ -14,7 +14,7 @@ interface ICatalogService {
 
 
     @GET("$SERVICE$SPEECH{uuid}")
-    suspend fun getSpeech(@Path("uuid") uuid: String): Deferred<Speech>
+    suspend fun getSpeech(@Path("uuid") uuid: String): Speech
 
     @GET("$SERVICE$SPEECH")
     suspend fun getSpeeches(
@@ -28,10 +28,10 @@ interface ICatalogService {
         @Query("executor") executorId: String?,
         @Query("creator") creatorId: String?,
         @Query("theme") theme: String?
-    ): Deferred<Array<Speech>>
+    ): ArrayList<Speech>
 
     @POST("$SERVICE$SPEECH$ARRAY")
-    suspend fun getSpeechesArray(@Body arrayId: Array<String>): Array<Speech>
+    suspend fun getSpeechesArray(@Body arrayId: Array<String>): ArrayList<Speech>
 
     @Multipart
     @PATCH("$SERVICE$SPEECH{uuid}/executor")
@@ -54,7 +54,7 @@ interface ICatalogService {
     suspend fun getCalendarSpeeches(
         @Query("minEndDate") minEndDate: Date,
         @Query("maxEndDate") maxEndDate: Date
-    ): Array<Speech>
+    ): ArrayList<Speech>
 
     @Multipart
     @PATCH("$SERVICE$SPEECH/{uuid}")
@@ -62,6 +62,6 @@ interface ICatalogService {
         @Path("uuid") speechId: String,
         @Part("Description") description: String,
         @Part("Theme") theme: String
-    ): Unit
+    )
 
 }

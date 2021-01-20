@@ -1,10 +1,11 @@
 package com.northis.speechvotingapp.di.module
 
 import android.app.Application
+import android.content.Context
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.northis.speechvotingapp.authentication.AuthorizationService
+import com.northis.speechvotingapp.authentication.IUserTokenManager
 import com.northis.speechvotingapp.authentication.UnsafeConnection
 import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IProfileService
@@ -23,24 +24,29 @@ import javax.net.ssl.X509TrustManager
 @Module
 class ApiModule(private val baseUrl: String) {
     @Provides
-    fun provideHttpCache(application: Application): Cache? {
+    fun provideHttpCache(application: Application): Cache {
         val cacheSize = 10 * 1024 * 1024
         return Cache(application.cacheDir, cacheSize.toLong())
     }
 
     @Provides
     @Singleton
-    fun provideGson(): Gson? {
+    fun provideGson(): Gson {
         val gsonBuilder = GsonBuilder()
-        gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+        with(gsonBuilder) {
+            setDateFormat("yyyy-MM-dd")
+            setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+        }
+
         return gsonBuilder.create()
     }
 
     @Provides
     @Singleton
     fun provideOkhttpClient(
-        cache: Cache?,
-        authService: AuthorizationService
+        context: Context,
+        cache: Cache,
+        userTokenManager: IUserTokenManager
     ): OkHttpClient {
         val client = OkHttpClient.Builder()
         with(client) {
@@ -56,7 +62,7 @@ class ApiModule(private val baseUrl: String) {
                     .newBuilder()
                     .addHeader(
                         "Authorization",
-                        "Bearer ${authService.getAccessToken()}"
+                        "Bearer ${userTokenManager.getAccessToken(context)}"
                     )
                     .build()
                 return@Interceptor chain.proceed(newRequest)
@@ -67,7 +73,7 @@ class ApiModule(private val baseUrl: String) {
 
     @Provides
     @Singleton
-    fun provideRetrofit(gson: Gson?, okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(gson: Gson, okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)

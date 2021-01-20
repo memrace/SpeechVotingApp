@@ -1,12 +1,11 @@
 package com.northis.speechvotingapp.model
 
-import java.util.*
+data class IdentityUser(
 
-data class User(
     val Email: String,
     val FirstName: String,
-    val LastName: String,
-    val Id: UUID,
+    val Id: String,
     val ImageUrl: String,
+    val LastName: String,
     val UserName: String
 )

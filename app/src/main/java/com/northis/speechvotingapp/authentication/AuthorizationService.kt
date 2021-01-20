@@ -1,6 +1,7 @@
 package com.northis.speechvotingapp.authentication
 
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.net.http.SslError
@@ -12,12 +13,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import com.northis.speechvotingapp.network.IAuthService
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
@@ -27,11 +25,12 @@ import javax.net.ssl.X509TrustManager
 
 class AuthorizationService @Inject constructor(
     private val context: Context,
-    private val userTokenStorage: IUserTokenStorage,
+    private val application: Application,
+    private val userTokenManager: IUserTokenManager,
     private val oauthSettingsProvider: IOAuthSettingsProvider
 ) {
 
-    //CallBack
+    // CallBack
     private lateinit var callback: OnTokenAcquiredListener
 
     // Создаем и проверяем в ответе для избежания CSRF атак.
@@ -50,6 +49,21 @@ class AuthorizationService @Inject constructor(
         .appendQueryParameter("scope", oauthSettingsProvider.scope)
         .appendQueryParameter("state", uniqueState)
         .build()
+
+    public suspend fun checkAuthorization(callback: OnTokenFailureListener){
+        val accessToken = userTokenManager.getAccessToken(context)
+        val refreshToken = userTokenManager.getRefreshToken(context)
+        if (accessToken == null || refreshToken == null) {
+            callback.onTokenFailure()
+        } else {
+            if (userTokenManager.isExpiredToken(context)){
+                val data = GlobalScope.async(Dispatchers.IO) {
+                    refreshToken()
+                }
+                data.await()
+            }
+        }
+    }
 
 
     private fun getAuthApi(): IAuthService {
@@ -71,52 +85,64 @@ class AuthorizationService @Inject constructor(
         return retrofit.create(IAuthService::class.java)
     }
 
-    fun getAccessToken(): String? {
-        return if (userTokenStorage.isExpired(context)) {
-            GlobalScope.async {
-                refreshToken()
+
+    private suspend fun refreshToken() = coroutineScope {
+        val refreshToken = userTokenManager.getRefreshToken(context)
+        if (refreshToken != null) {
+            val data = async(Dispatchers.IO) {
+                getAuthApi().refreshToken(
+                    oauthSettingsProvider.clientId,
+                    oauthSettingsProvider.clientSecret,
+                    oauthSettingsProvider.grantTypeRefresh,
+                    refreshToken
+                )
             }
-            userTokenStorage.getAccessToken(context)
-        } else {
-            userTokenStorage.getAccessToken(context)
+            val oauthData = data.await()
+            with(userTokenManager) {
+                saveToken(
+                    context,
+                    oauthData.access_token,
+                    oauthData.id_token,
+                    oauthData.refresh_token
+                )
+                oauthData.expires_in?.let { setExpirationDate(context, it) }
+            }
+            Log.d(
+                "success",
+                "Токены обновлены и сохранены! ${oauthData.access_token} ; ${oauthData.refresh_token}"
+            )
         }
     }
 
-    private fun refreshToken() {
-        val refreshToken = userTokenStorage.getRefreshToken(context)
-        if (refreshToken != null) {
-            val call = getAuthApi().refreshToken(
+    private suspend fun getOAuthData() = coroutineScope {
+
+        val data = async(Dispatchers.IO) {
+            getAuthApi().getToken(
                 oauthSettingsProvider.clientId,
                 oauthSettingsProvider.clientSecret,
-                oauthSettingsProvider.grantTypeRefresh,
-                refreshToken
+                responseCode,
+                oauthSettingsProvider.grantType,
+                oauthSettingsProvider.redirectUri,
+                oauthSettingsProvider.codeVerifier
             )
-            call.enqueue(object : Callback<OAuthAccessTokenResponse> {
-                override fun onResponse(
-                    call: Call<OAuthAccessTokenResponse>,
-                    response: Response<OAuthAccessTokenResponse>
-                ) {
-                    val data = response.body()
-                    if (data != null) {
-                        with(userTokenStorage) {
-                            saveToken(context, data.access_token, data.id_token, data.refresh_token)
-                            data.expires_in?.let { setExpirationDate(context, it) }
-                        }
-                        Log.d(
-                            "success",
-                            "Токены обновлены и сохранены! ${data.access_token} ; ${data.refresh_token}"
-                        )
-                    }
-
-                }
-
-                override fun onFailure(call: Call<OAuthAccessTokenResponse>, t: Throwable) {
-                    Log.d("error", "Ошибка!!!")
-                }
-
-            })
         }
-
+        val oauthData = data.await()
+        with(userTokenManager) {
+            saveToken(
+                context,
+                oauthData.access_token,
+                oauthData.id_token,
+                oauthData.refresh_token
+            )
+            oauthData.expires_in?.let {
+                setExpirationDate(context, it)
+            }
+            Log.d(
+                "success",
+                "Токены получены и сохранены! ${oauthData.access_token} ; ${oauthData.refresh_token}"
+            )
+            callback.onTokenAcquired()
+        }
     }
 
     fun startAuthentication(webView: WebView, callback: OnTokenAcquiredListener) {
@@ -127,43 +153,6 @@ class AuthorizationService @Inject constructor(
         webView.settings.useWideViewPort = true
         webView.loadUrl(uri.toString())
         Log.d("Request Access Token", "Запрос на получение токена.")
-    }
-
-    private fun getOAuthData() {
-        val call = getAuthApi().getToken(
-            oauthSettingsProvider.clientId,
-            oauthSettingsProvider.clientSecret,
-            responseCode,
-            oauthSettingsProvider.grantType,
-            oauthSettingsProvider.redirectUri,
-            oauthSettingsProvider.codeVerifier
-        )
-        call.enqueue(object : Callback<OAuthAccessTokenResponse> {
-            override fun onResponse(
-                call: Call<OAuthAccessTokenResponse>,
-                response: Response<OAuthAccessTokenResponse>
-            ) {
-                val data = response.body()
-                with(userTokenStorage) {
-                    if (data != null) {
-                        saveToken(context, data.access_token, data.id_token, data.refresh_token)
-                        data.expires_in?.let {
-                            setExpirationDate(context, it)
-                        }
-                        Log.d(
-                            "success",
-                            "Токены получены и сохранены! ${data.access_token} ; ${data.refresh_token}"
-                        )
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<OAuthAccessTokenResponse>, t: Throwable) {
-                Log.d("error", "Ошибка!!!")
-            }
-
-        })
-
     }
 
     private inner class WvClient : WebViewClient() {
@@ -193,8 +182,8 @@ class AuthorizationService @Inject constructor(
                             responseCode = code
                             view?.visibility = View.GONE
                             Log.d("code", responseCode)
-                            getOAuthData()
-                            callback.onTokenAcquired()
+                            GlobalScope.launch { getOAuthData() }
+
                         } ?: run {
                             Log.d("problems", "что-то пошло не так.")
                         }

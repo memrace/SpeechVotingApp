@@ -1,6 +1,6 @@
-package com.northis.speechvotingapp.authentication
+package com.northis.speechvotingapp.network
 
-import retrofit2.Call
+import com.northis.speechvotingapp.authentication.OAuthAccessTokenResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -8,21 +8,21 @@ import retrofit2.http.POST
 interface IAuthService {
     @POST("token")
     @FormUrlEncoded
-    fun getToken(
+    suspend fun getToken(
         @Field("client_id") client_id: String,
         @Field("client_secret") client_secret: String,
         @Field("code") code: String,
         @Field("grant_type") grant_type: String,
         @Field("redirect_uri") redirect_uri: String,
         @Field("code_verifier") code_verifier: String
-    ): Call<OAuthAccessTokenResponse>
+    ): OAuthAccessTokenResponse
 
     @POST
     @FormUrlEncoded
-    fun refreshToken(
+    suspend fun refreshToken(
         @Field("client_id") client_id: String,
         @Field("client_secret") client_secret: String,
         @Field("grant_type") grant_type: String,
         @Field("refresh_token") refresh_token: String,
-    ): Call<OAuthAccessTokenResponse>
+    ): OAuthAccessTokenResponse
 }

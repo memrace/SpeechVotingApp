@@ -1,7 +1,6 @@
 package com.northis.speechvotingapp.network
 
-import com.northis.speechvotingapp.model.User
-import kotlinx.coroutines.Deferred
+import com.northis.speechvotingapp.model.IdentityUser
 import retrofit2.http.*
 
 private const val SERVICE = "profiles/"
@@ -11,11 +10,11 @@ interface IProfileService {
     @GET("$SERVICE{uuid}")
     suspend fun getUser(
         @Path("uuid") uuid: String
-    ): User
+    ): IdentityUser
 
     @GET(SERVICE)
-    suspend fun getUsers(): Array<User>
+    suspend fun getUsers(): ArrayList<IdentityUser>
 
     @POST("$SERVICE$ARRAY")
-    suspend fun getUsersArray(@Body arrayId: Array<String>): Array<User>
+    suspend fun getUsersArray(@Body arrayId: Array<String>): ArrayList<IdentityUser>
 }
