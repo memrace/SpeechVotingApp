@@ -1,30 +1,31 @@
 package com.northis.speechvotingapp.viewmodel
 
 
-import android.app.Application
-import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.northis.speechvotingapp.authentication.IUserTokenManager
+import androidx.lifecycle.viewModelScope
+import com.northis.speechvotingapp.authentication.AuthorizationService
+import com.northis.speechvotingapp.authentication.OnTokenFailureListener
 import com.northis.speechvotingapp.model.UserVote
 import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IProfileService
 import com.northis.speechvotingapp.network.IVotingService
-import com.northis.speechvotingapp.view.authorization.AuthActivity
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
 // TODO СДЕЛАТЬ РЕСУРС-КЛАСС, ОБРАБОТКА ОШИБОК.
-class VotingViewModel @Inject constructor(
+class VotingViewModel(
     private val votingApi: IVotingService,
     private val catalogApi: ICatalogService,
     private val profileApi: IProfileService,
-    application: Application,
-    userTokenManager: IUserTokenManager
+    private val authService: AuthorizationService
 ) : ViewModel() {
 
+    fun checkAuthority(callback: OnTokenFailureListener) {
+        viewModelScope.launch(Dispatchers.Main) { authService.checkAuthorization(callback) }
+    }
 
     fun getVotingList() = liveData(Dispatchers.IO) {
         val data = votingApi.getVotingList()

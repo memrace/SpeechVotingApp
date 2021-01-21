@@ -17,7 +17,7 @@ interface IAuthService {
         @Field("code_verifier") code_verifier: String
     ): OAuthAccessTokenResponse
 
-    @POST
+    @POST("token")
     @FormUrlEncoded
     suspend fun refreshToken(
         @Field("client_id") client_id: String,

@@ -1,7 +1,6 @@
 package com.northis.speechvotingapp.authentication
 
 
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.net.http.SslError
@@ -25,7 +24,6 @@ import javax.net.ssl.X509TrustManager
 
 class AuthorizationService @Inject constructor(
     private val context: Context,
-    private val application: Application,
     private val userTokenManager: IUserTokenManager,
     private val oauthSettingsProvider: IOAuthSettingsProvider
 ) {
@@ -50,21 +48,19 @@ class AuthorizationService @Inject constructor(
         .appendQueryParameter("state", uniqueState)
         .build()
 
-    public suspend fun checkAuthorization(callback: OnTokenFailureListener){
+    suspend fun checkAuthorization(callback: OnTokenFailureListener) {
         val accessToken = userTokenManager.getAccessToken(context)
         val refreshToken = userTokenManager.getRefreshToken(context)
         if (accessToken == null || refreshToken == null) {
             callback.onTokenFailure()
-        } else {
-            if (userTokenManager.isExpiredToken(context)){
-                val data = GlobalScope.async(Dispatchers.IO) {
-                    refreshToken()
-                }
-                data.await()
+        }
+        if (userTokenManager.isExpiredToken(context)) {
+            val data = GlobalScope.async(Dispatchers.IO) {
+                refreshToken()
             }
+            data.await()
         }
     }
-
 
     private fun getAuthApi(): IAuthService {
         val gsonBuilder = GsonBuilder()
