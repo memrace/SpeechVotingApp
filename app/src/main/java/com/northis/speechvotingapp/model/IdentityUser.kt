@@ -1,7 +1,6 @@
 package com.northis.speechvotingapp.model
 
 data class IdentityUser(
-
     val Email: String,
     val FirstName: String,
     val Id: String,

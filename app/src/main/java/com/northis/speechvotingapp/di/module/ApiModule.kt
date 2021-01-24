@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.northis.speechvotingapp.authentication.IUserTokenManager
+import com.northis.speechvotingapp.authentication.IUserManager
 import com.northis.speechvotingapp.authentication.UnsafeConnection
 import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IProfileService
@@ -46,7 +46,7 @@ class ApiModule(private val baseUrl: String) {
     fun provideOkhttpClient(
         context: Context,
         cache: Cache,
-        userTokenManager: IUserTokenManager
+        userManager: IUserManager
     ): OkHttpClient {
         val client = OkHttpClient.Builder()
         with(client) {
@@ -62,8 +62,9 @@ class ApiModule(private val baseUrl: String) {
                     .newBuilder()
                     .addHeader(
                         "Authorization",
-                        "Bearer ${userTokenManager.getAccessToken(context)}"
+                        "Bearer ${userManager.getAccessTokens(context)}"
                     )
+                    .addHeader("Content-Type", "application/json")
                     .build()
                 return@Interceptor chain.proceed(newRequest)
             })

@@ -2,7 +2,7 @@ package com.northis.speechvotingapp.di.module
 
 import com.northis.speechvotingapp.authentication.IOAuthSettingsProvider
 import com.northis.speechvotingapp.authentication.IOAuthSettingsProvider.Companion.instance
-import com.northis.speechvotingapp.authentication.IUserTokenManager
+import com.northis.speechvotingapp.authentication.IUserManager
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -11,8 +11,8 @@ import javax.inject.Singleton
 class OAuthModule() {
     @Provides
     @Singleton
-    fun provideUserTokenStorage(): IUserTokenManager {
-        return IUserTokenManager.instance
+    fun provideUserTokenStorage(): IUserManager {
+        return IUserManager.instance
     }
 
     @Provides

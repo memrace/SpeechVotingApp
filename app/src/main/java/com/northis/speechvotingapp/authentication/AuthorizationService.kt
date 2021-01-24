@@ -24,7 +24,7 @@ import javax.net.ssl.X509TrustManager
 
 class AuthorizationService @Inject constructor(
     private val context: Context,
-    private val userTokenManager: IUserTokenManager,
+    private val userManager: IUserManager,
     private val oauthSettingsProvider: IOAuthSettingsProvider
 ) {
 
@@ -48,18 +48,19 @@ class AuthorizationService @Inject constructor(
         .appendQueryParameter("state", uniqueState)
         .build()
 
-    suspend fun checkAuthorization(callback: OnTokenFailureListener) {
-        val accessToken = userTokenManager.getAccessToken(context)
-        val refreshToken = userTokenManager.getRefreshToken(context)
+    fun checkAuthorization(callback: OnTokenFailureListener) {
+        val accessToken = userManager.getAccessTokens(context)
+        val refreshToken = userManager.getRefreshToken(context)
         if (accessToken == null || refreshToken == null) {
             callback.onTokenFailure()
-        }
-        if (userTokenManager.isExpiredToken(context)) {
-            val data = GlobalScope.async(Dispatchers.IO) {
-                refreshToken()
+        } else {
+            if (userManager.isExpiredToken(context)) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    refreshToken()
+                }
             }
-            data.await()
         }
+
     }
 
     private fun getAuthApi(): IAuthService {
@@ -83,7 +84,7 @@ class AuthorizationService @Inject constructor(
 
 
     private suspend fun refreshToken() = coroutineScope {
-        val refreshToken = userTokenManager.getRefreshToken(context)
+        val refreshToken = userManager.getRefreshToken(context)
         if (refreshToken != null) {
             val data = async(Dispatchers.IO) {
                 getAuthApi().refreshToken(
@@ -94,7 +95,7 @@ class AuthorizationService @Inject constructor(
                 )
             }
             val oauthData = data.await()
-            with(userTokenManager) {
+            with(userManager) {
                 saveToken(
                     context,
                     oauthData.access_token,
@@ -123,7 +124,7 @@ class AuthorizationService @Inject constructor(
             )
         }
         val oauthData = data.await()
-        with(userTokenManager) {
+        with(userManager) {
             saveToken(
                 context,
                 oauthData.access_token,
@@ -133,10 +134,12 @@ class AuthorizationService @Inject constructor(
             oauthData.expires_in?.let {
                 setExpirationDate(context, it)
             }
+            saveUserId(context, oauthData.id_token)
             Log.d(
                 "success",
-                "Токены получены и сохранены! ${oauthData.access_token} ; ${oauthData.refresh_token}"
+                "Токены получены и сохранены! ${oauthData.access_token} ; ${oauthData.refresh_token} ; ${oauthData.expires_in}"
             )
+            Log.d("user_info", "${userManager.getUserId(context)}")
             callback.onTokenAcquired()
         }
     }

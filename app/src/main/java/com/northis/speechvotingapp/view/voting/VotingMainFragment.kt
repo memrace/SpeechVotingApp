@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.northis.speechvotingapp.databinding.FragmentVotingMainBinding
-import com.northis.speechvotingapp.view.voting.recyclerview.VotingMainFragmentRecyclerViewAdapter
+import com.northis.speechvotingapp.view.voting.recyclerview.VotingMainAdapter
 import com.northis.speechvotingapp.viewmodel.VotingViewModel
 import com.northis.speechvotingapp.viewmodel.VotingViewModelFactory
 import javax.inject.Inject
@@ -29,6 +29,7 @@ class VotingMainFragment : Fragment() {
         _binding = FragmentVotingMainBinding.inflate(inflater, container, false)
         votingActivity = (activity as VotingActivity)
         votingActivity.apiComponent.inject(this)
+        votingActivity.mBinding.inclTopAppBar.topAppBar.title = "Голосование"
         return binding.root
     }
 
@@ -36,11 +37,18 @@ class VotingMainFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         val votingListRecyclerView = binding.votingListRecyclerView
         votingViewModel.getVotingList().observe(viewLifecycleOwner, {
-
-            votingListRecyclerView.adapter =
-                VotingMainFragmentRecyclerViewAdapter(context, it, votingActivity.navController)
-            votingListRecyclerView.layoutManager = LinearLayoutManager(context)
+            if (it != null) {
+                votingListRecyclerView.adapter =
+                    VotingMainAdapter(
+                        context,
+                        it,
+                        votingActivity.navController,
+                        votingViewModel
+                    )
+                votingListRecyclerView.layoutManager = LinearLayoutManager(context)
+            }
         })
+
     }
 
     override fun onDestroy() {

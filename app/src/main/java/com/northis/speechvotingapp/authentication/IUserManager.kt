@@ -5,9 +5,11 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.auth0.android.jwt.JWT
 import java.util.*
+import kotlin.math.log
 
-interface IUserTokenManager {
+interface IUserManager {
     fun getStorage(context: Context): SharedPreferences {
         val mainKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -23,14 +25,28 @@ interface IUserTokenManager {
     }
 
     fun saveToken(context: Context, accessToken: String, idToken: String?, refreshToken: String?)
-    fun getAccessToken(context: Context): String?
+    fun getAccessTokens(context: Context): String?
     fun getRefreshToken(context: Context): String?
-    fun setExpirationDate(context: Context, expiresIn: Int)
+    fun setExpirationDate(context: Context, expiresIn: Long)
     fun isExpiredToken(context: Context): Boolean
+    fun saveUserId(context: Context, idToken: String) {
+        val jwt = JWT(idToken)
+        val sharedPreferences = getStorage(context)
+        with(sharedPreferences.edit()) {
+            putString(StorageValuesEnum.USER_ID.toString(), jwt.subject)
+            apply()
+        }
+        Log.d("JWT", jwt.subject.toString())
+    }
+
+    fun getUserId(context: Context): String {
+        val sharedPreferences = getStorage(context)
+        return sharedPreferences.getString(StorageValuesEnum.USER_ID.toString(), "nothing").toString()
+    }
 
     companion object {
-        val instance: IUserTokenManager by lazy {
-            object : IUserTokenManager {
+        val instance: IUserManager by lazy {
+            object : IUserManager {
                 override fun saveToken(
                     context: Context,
                     accessToken: String,
@@ -46,7 +62,7 @@ interface IUserTokenManager {
                     }
                 }
 
-                override fun getAccessToken(context: Context): String? {
+                override fun getAccessTokens(context: Context): String? {
                     val sharedPreferences = getStorage(context)
                     Log.d(
                         "Token request",
@@ -73,11 +89,11 @@ interface IUserTokenManager {
 
                 override fun setExpirationDate(
                     context: Context,
-                    expiresIn: Int
+                    expiresIn: Long
                 ) {
                     val sharedPreferences = getStorage(context)
                     val dateNow = Date().time
-                    val expiresDateToken = dateNow + (expiresIn * 1000).toLong()
+                    val expiresDateToken = dateNow + (expiresIn * 1000)
                     with(sharedPreferences.edit()) {
                         putLong(
                             StorageValuesEnum.EXPIRATION_DATE_TOKEN.toString(),
@@ -106,4 +122,5 @@ private enum class StorageValuesEnum {
     ID_TOKEN,
     REFRESH_TOKEN,
     EXPIRATION_DATE_TOKEN,
+    USER_ID
 }

@@ -5,9 +5,7 @@ import com.northis.speechvotingapp.di.module.AppModule
 import com.northis.speechvotingapp.di.module.OAuthModule
 import com.northis.speechvotingapp.view.catalog.CatalogActivity
 import com.northis.speechvotingapp.view.schedule.ScheduleActivity
-import com.northis.speechvotingapp.view.voting.VotingActivity
-import com.northis.speechvotingapp.view.voting.VotingDetailsFragment
-import com.northis.speechvotingapp.view.voting.VotingMainFragment
+import com.northis.speechvotingapp.view.voting.*
 import dagger.Component
 import javax.inject.Singleton
 
@@ -18,5 +16,7 @@ interface ApiComponent {
     fun inject(catalogActivity: CatalogActivity)
     fun inject(scheduleActivity: ScheduleActivity)
     fun inject(votingMainFragment: VotingMainFragment)
-    fun inject(votingMainFragment: VotingDetailsFragment)
+    fun inject(votingDetailsFragment: VotingDetailsFragment)
+    fun inject(votingDetailsFragment: VotingAddSpeechFragment)
+    fun inject(votingDetailsFragment: VotingAddScheduleFragment)
 }

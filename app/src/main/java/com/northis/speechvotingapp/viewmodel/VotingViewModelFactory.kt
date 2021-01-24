@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.northis.speechvotingapp.authentication.AuthorizationService
+import com.northis.speechvotingapp.authentication.IUserManager
 import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IProfileService
 import com.northis.speechvotingapp.network.IVotingService
@@ -14,9 +15,10 @@ class VotingViewModelFactory @Inject constructor(
     private val votingApi: IVotingService,
     private val catalogApi: ICatalogService,
     private val profileApi: IProfileService,
-    private val authService: AuthorizationService
+    private val authService: AuthorizationService,
+    private val userManager: IUserManager
 ) : ViewModelProvider.AndroidViewModelFactory(application) {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return VotingViewModel(votingApi, catalogApi, profileApi, authService) as T
+        return VotingViewModel(application, votingApi, catalogApi, profileApi, authService, userManager) as T
     }
 }

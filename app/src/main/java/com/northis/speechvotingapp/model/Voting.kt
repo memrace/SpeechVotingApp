@@ -1,5 +1,6 @@
 package com.northis.speechvotingapp.model
 import java.util.*
+import kotlin.collections.ArrayList
 
 data class Voting(
     val Creator: IdentityUser,
@@ -9,6 +10,6 @@ data class Voting(
     val Title: String,
     val TotalVotes: Int?,
     val VotingId: UUID,
-    val VotingSpeeches: List<VotingSpeech>?
+    val VotingSpeeches: ArrayList<VotingSpeech>?
 )
 

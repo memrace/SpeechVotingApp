@@ -1,8 +1,6 @@
 package com.northis.speechvotingapp.model
 
-import java.util.*
-
 data class UserVote(
-    val Speech: UUID,
-    val VotingId: UUID
+    val Speech: String,
+    val VotingId: String
 )
