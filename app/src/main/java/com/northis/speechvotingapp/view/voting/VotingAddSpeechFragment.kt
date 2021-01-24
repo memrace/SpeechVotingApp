@@ -44,8 +44,10 @@ class VotingAddSpeechFragment : Fragment() {
         val speechesRV = binding.votingAddSpeechRV
         votingViewModel.loadSpeeches().observe(viewLifecycleOwner, Observer {
             Log.d("Speeches", it.toString())
-            speechesRV.adapter = VotingAddSpeechAdapter(context, it, votingViewModel)
-            speechesRV.layoutManager = LinearLayoutManager(context)
+            if (it != null) {
+                speechesRV.adapter = VotingAddSpeechAdapter(context, it, votingViewModel)
+                speechesRV.layoutManager = LinearLayoutManager(context)
+            }
         })
         votingViewModel.speechId.observe(viewLifecycleOwner, Observer {
             lifecycleScope.launch(Dispatchers.Main) {

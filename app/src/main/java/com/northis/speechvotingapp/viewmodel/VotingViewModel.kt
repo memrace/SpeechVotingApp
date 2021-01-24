@@ -4,10 +4,8 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import androidx.lifecycle.viewModelScope
 import com.northis.speechvotingapp.authentication.AuthorizationService
 import com.northis.speechvotingapp.authentication.IUserManager
-import com.northis.speechvotingapp.authentication.OnTokenFailureListener
 import com.northis.speechvotingapp.model.SpeechStatus
 import com.northis.speechvotingapp.model.UserVote
 import com.northis.speechvotingapp.network.ICatalogService
@@ -16,7 +14,6 @@ import com.northis.speechvotingapp.network.IVotingService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 
 // TODO СДЕЛАТЬ РЕСУРС-КЛАСС, ОБРАБОТКА ОШИБОК.
@@ -43,12 +40,12 @@ class VotingViewModel(
     }
 
     fun getVoting() = liveData(Dispatchers.IO) {
-        val data = votingApi.getVoting(votingId)
+        val data = votingApi.getVoting(votingId).body()
         emit(data)
     }
 
     fun getWinner() = liveData(Dispatchers.IO) {
-        val data = votingApi.getWinner(votingId)
+        val data = votingApi.getWinner(votingId).body()
         emit(data)
     }
 
@@ -61,18 +58,19 @@ class VotingViewModel(
 
     suspend fun addVote(speechId: String) = coroutineScope {
         val data = async(Dispatchers.IO) {
-            votingApi.addVoteToSpeech(votingId, UserVote(speechId, _userId))
+            votingApi.addVoteToSpeech(votingId, UserVote(speechId, _userId)).body()
         }
         data.await()
     }
 
     fun removeVote(userId: String) = liveData(Dispatchers.IO) {
-        val data = votingApi.removeVote(votingId, userId)
+        val data = votingApi.removeVote(votingId, userId).body()
         emit(data)
     }
 
     fun loadSpeeches() = liveData(Dispatchers.IO) {
-        val data = catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString())
+        val data =
+            catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString()).body()
         emit(data)
     }
 }

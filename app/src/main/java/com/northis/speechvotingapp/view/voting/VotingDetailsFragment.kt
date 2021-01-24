@@ -43,10 +43,13 @@ class VotingDetailsFragment : Fragment() {
         val appBar = votingActivity.mBinding.inclTopAppBar.topAppBar
         votingViewModel.getVoting().observe(viewLifecycleOwner, {
             Log.d("VOTING", it.toString())
-            votingRecyclerView.adapter = VotingDetailsAdapter(context, it, votingViewModel)
-            votingRecyclerView.layoutManager = LinearLayoutManager(context)
-            appBar.title = it.Title
-            binding.votingEndDate.text = it.EndDate?.toString() ?: "Голосование ещё не начато"
+            if (it != null) {
+                votingRecyclerView.adapter = VotingDetailsAdapter(context, it, votingViewModel)
+                votingRecyclerView.layoutManager = LinearLayoutManager(context)
+                appBar.title = it.Title
+                binding.votingEndDate.text = it.EndDate?.toString() ?: "Голосование ещё не начато"
+            }
+
         })
         binding.floatingActionButton.setOnClickListener {
             votingActivity.navController.navigate(R.id.action_votingDetailsFragment_to_votingAddSpeechFragment)
