@@ -56,9 +56,12 @@ class VotingAddSpeechFragment : Fragment() {
                         votingViewModel.addSpeechToVoting(it)
                     }
                 }
-                with(Toast.makeText(context, response.await().code().toString(), Toast.LENGTH_SHORT)) {
-                    show()
-                }
+                response.await().observe(viewLifecycleOwner, {
+                    with(Toast.makeText(context, it.code(), Toast.LENGTH_SHORT)) {
+                        show()
+                    }
+                })
+
             }
         })
     }

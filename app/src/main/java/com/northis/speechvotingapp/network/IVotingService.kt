@@ -13,10 +13,10 @@ private const val WINNER = "winner/"
 
 interface IVotingService {
     @POST("$SERVICE$VOTING{uuid}/speeches")
-    suspend fun addSpeechToVoting(@Path("uuid") votingId: String, @Body speechId: String): Response<Unit>
+    suspend fun addSpeech(@Path("uuid") votingId: String, @Body speechId: String): Response<Unit>
 
     @POST("$SERVICE$VOTING{uuid}/$VOTE")
-    suspend fun addVoteToSpeech(@Path("uuid") votingId: String, @Body vote: UserVote): Response<Unit>
+    suspend fun addVote(@Path("uuid") votingId: String, @Body vote: UserVote): Response<Unit>
 
     @GET("$SERVICE$VOTING{uuid}")
     suspend fun getVoting(@Path("uuid") votingId: String): Response<Voting>
@@ -24,9 +24,13 @@ interface IVotingService {
     @GET("$SERVICE$VOTING")
     suspend fun getVotingList(): Response<ArrayList<Voting>>
 
-    @DELETE("$SERVICE$VOTING/{uuid}$VOTE{userId}")
+    @DELETE("$SERVICE$VOTING{uuid}/$VOTE{userId}")
     suspend fun removeVote(@Path("uuid") votingId: String, @Path("userId") userId: String): Response<Unit>
 
-    @GET("$SERVICE$VOTING{UUID}/$WINNER")
+    @GET("$SERVICE$VOTING{uuid}/$WINNER")
     suspend fun getWinner(@Path("uuid") votingId: String): Response<Speech>
+
+    @PATCH("$SERVICE$VOTING{uuid}/$VOTE{userId}")
+    suspend fun switchVote(@Path("uuid") votingId: String, @Path("userId") userId: String, @Body speechId: String): Response<Unit>
+
 }

@@ -8,12 +8,12 @@ import com.northis.speechvotingapp.authentication.AuthorizationService
 import com.northis.speechvotingapp.authentication.IUserManager
 import com.northis.speechvotingapp.model.SpeechStatus
 import com.northis.speechvotingapp.model.UserVote
+import com.northis.speechvotingapp.model.Voting
+import com.northis.speechvotingapp.model.VotingSpeech
 import com.northis.speechvotingapp.network.ICatalogService
 import com.northis.speechvotingapp.network.IProfileService
 import com.northis.speechvotingapp.network.IVotingService
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 
 
 // TODO СДЕЛАТЬ РЕСУРС-КЛАСС, ОБРАБОТКА ОШИБОК.
@@ -25,11 +25,8 @@ class VotingViewModel(
     private val authService: AuthorizationService,
     private val userManager: IUserManager
 ) : ViewModel() {
-    var votingId: String = ""
+    var voting: Voting? = null
     val speechId: MutableLiveData<String> by lazy {
-        MutableLiveData<String>()
-    }
-    val speechVotingId: MutableLiveData<String> by lazy {
         MutableLiveData<String>()
     }
     private val _userId: String by lazy { userManager.getUserId(context) }
@@ -40,37 +37,43 @@ class VotingViewModel(
     }
 
     fun getVoting() = liveData(Dispatchers.IO) {
-        val data = votingApi.getVoting(votingId).body()
+        val data = votingApi.getVoting(voting?.VotingId.toString()).body()
         emit(data)
     }
 
     fun getWinner() = liveData(Dispatchers.IO) {
-        val data = votingApi.getWinner(votingId).body()
+        val data = votingApi.getWinner(voting?.VotingId.toString()).body()
         emit(data)
     }
 
-    suspend fun addSpeechToVoting(speechId: String) = coroutineScope {
-        val data = async(Dispatchers.IO) {
-            votingApi.addSpeechToVoting(votingId, speechId)
+    fun addSpeechToVoting(speechId: String) = liveData(Dispatchers.IO) {
+        val response = votingApi.addSpeech(voting?.VotingId.toString(), speechId)
+        if (response.isSuccessful) {
+            emit(response)
         }
-        data.await()
     }
 
-    suspend fun addVote(speechId: String) = coroutineScope {
-        val data = async(Dispatchers.IO) {
-            votingApi.addVoteToSpeech(votingId, UserVote(speechId, _userId)).body()
+    fun addVote(speechId: String) = liveData(Dispatchers.IO) {
+        val response = votingApi.addVote(voting?.VotingId.toString(), UserVote(speechId, _userId))
+        if (response.isSuccessful) {
+            emit(response)
         }
-        data.await()
     }
 
-    fun removeVote(userId: String) = liveData(Dispatchers.IO) {
-        val data = votingApi.removeVote(votingId, userId).body()
-        emit(data)
+    fun removeVote() = liveData(Dispatchers.IO) {
+        val response = votingApi.removeVote(voting?.VotingId.toString(), _userId)
+        emit(response)
+    }
+
+    fun switchVote(speechId: String) = liveData(Dispatchers.IO) {
+        val response = votingApi.switchVote(voting?.VotingId.toString(), _userId, speechId)
+        if (response.isSuccessful){
+            emit(response)
+        }
     }
 
     fun loadSpeeches() = liveData(Dispatchers.IO) {
-        val data =
-            catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString()).body()
+        val data = catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString()).body()
         emit(data)
     }
 }

@@ -41,7 +41,9 @@ interface IUserManager {
 
     fun getUserId(context: Context): String {
         val sharedPreferences = getStorage(context)
-        return sharedPreferences.getString(StorageValuesEnum.USER_ID.toString(), "nothing").toString()
+        val userId = sharedPreferences.getString(StorageValuesEnum.USER_ID.toString(), "nothing").toString()
+        Log.d("userId" , userId)
+        return userId
     }
 
     companion object {

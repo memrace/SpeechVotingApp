@@ -40,7 +40,7 @@ class VotingMainAdapter(
         holder.votedUsersTotalTV.text = "${voting.TotalVotes}"
         holder.daysLeftTV.text = getTimeHasLeft(voting)
             holder.holderLayout.setOnClickListener {
-                vm.votingId = voting.VotingId.toString()
+                vm.voting = voting
                 navController.navigate(R.id.action_votingMainFragment_to_votingDetailsFragment)
             }
     }
