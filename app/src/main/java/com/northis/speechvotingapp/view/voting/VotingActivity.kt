@@ -22,10 +22,6 @@ import javax.inject.Inject
 
 
 class VotingActivity : AppCompatActivity(), OnTokenFailureListener {
-    //VM
-    @Inject
-    internal lateinit var votingViewModelFactory: VotingViewModelFactory
-    private val votingViewModel: VotingViewModel by viewModels(factoryProducer = { votingViewModelFactory })
 
     @Inject
     internal lateinit var authorizationService: AuthorizationService

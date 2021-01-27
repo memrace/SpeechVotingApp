@@ -18,7 +18,9 @@
             android:clickable="true"
             android:src="@drawable/ic_add_circle_24px"
             app:layout_constraintBottom_toTopOf="@+id/votingEndDate"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@string/addspeech"
+            android:focusable="true" />
 
         <TextView
             android:id="@+id/votingEndDate"

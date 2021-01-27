@@ -41,17 +41,27 @@ class VotingDetailsFragment : Fragment() {
         votingViewModel.getVoting().observe(viewLifecycleOwner, {
             Log.d("VOTING", it.toString())
             if (it != null) {
+                votingViewModel.voting = it
                 votingRecyclerView.adapter =
-                    VotingDetailsAdapter(context, viewLifecycleOwner, it, votingViewModel)
+                    VotingDetailsAdapter(context, viewLifecycleOwner, votingViewModel)
                 votingRecyclerView.layoutManager = LinearLayoutManager(context)
                 appBar.title = it.Title
                 binding.votingEndDate.text = it.EndDate?.toString() ?: "Голосование ещё не начато"
             }
 
         })
-        binding.floatingActionButton.setOnClickListener {
-            votingActivity.navController.navigate(R.id.action_votingDetailsFragment_to_votingAddSpeechFragment)
+        if (!votingViewModel.voting.HasEnded){
+            binding.floatingActionButton.setImageResource(R.drawable.ic_add_circle_24px)
+            binding.floatingActionButton.setOnClickListener {
+                votingActivity.navController.navigate(R.id.action_votingDetailsFragment_to_votingAddSpeechFragment)
+            }
+        } else {
+            binding.floatingActionButton.setImageResource(R.drawable.ic_calendar_today_24px)
+            binding.floatingActionButton.setOnClickListener {
+                votingActivity.navController.navigate(R.id.action_votingDetailsFragment_to_votingAddScheduleFragment)
+            }
         }
+
     }
 
 }

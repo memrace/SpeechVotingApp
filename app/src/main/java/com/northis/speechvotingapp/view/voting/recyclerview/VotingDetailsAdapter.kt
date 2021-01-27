@@ -16,7 +16,6 @@ import com.northis.speechvotingapp.viewmodel.VotingViewModel
 class VotingDetailsAdapter(
     private val context: Context?,
     private val lifecycleOwner: LifecycleOwner,
-    private val voting: Voting,
     private val vm: VotingViewModel
 ) : RecyclerView.Adapter<VotingDetailsAdapter.DetailsFragmentViewHolder>() {
     class DetailsFragmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,15 +35,15 @@ class VotingDetailsAdapter(
     }
 
     override fun onBindViewHolder(holder: DetailsFragmentViewHolder, position: Int) {
-        val votingSpeech = voting.VotingSpeeches?.get(position)
-        val speech = votingSpeech?.Speech
-        val creator = speech?.Creator
-        holder.speechTheme.text = speech?.Theme
-        holder.speechCreator.text = "${creator?.FirstName} ${creator?.LastName}"
+        val votingSpeech = vm.voting.VotingSpeeches[position]
+        val speech = votingSpeech.Speech
+        val creator = speech.Creator
+        holder.speechTheme.text = speech.Theme
+        holder.speechCreator.text = "${creator.FirstName} ${creator.LastName}"
         holder.holderLayout.setOnClickListener {
             Log.d("vote", "shortCLick")
-            if (!voting.HasUserVoted!!) {
-                vm.addVote(speech?.SpeechId.toString()).observe(lifecycleOwner, {
+            if (vm.voting.HasUserVoted) {
+                vm.addVote(speech.SpeechId.toString()).observe(lifecycleOwner, {
                     Log.d("vote", it.code().toString())
                 })
             } else {
@@ -55,7 +54,7 @@ class VotingDetailsAdapter(
         }
         holder.holderLayout.setOnLongClickListener {
             Log.d("vote", "longCLick")
-            if (votingSpeech?.HasUserVoted!!){
+            if (votingSpeech.HasUserVoted) {
                 vm.removeVote().observe(lifecycleOwner, {
                     Log.d("vote", it.code().toString())
                 })
@@ -65,7 +64,7 @@ class VotingDetailsAdapter(
     }
 
     override fun getItemCount(): Int {
-        return voting.VotingSpeeches?.size as Int
+        return vm.voting.VotingSpeeches.size
     }
 
 }
