@@ -10,7 +10,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.northis.speechvotingapp.R
-import com.northis.speechvotingapp.model.Voting
 import com.northis.speechvotingapp.viewmodel.VotingViewModel
 
 class VotingDetailsAdapter(
@@ -30,7 +29,7 @@ class VotingDetailsAdapter(
         viewType: Int
     ): DetailsFragmentViewHolder {
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.details_fragment_view_holder, parent, false)
+        val view = inflater.inflate(R.layout.voting_details_fragment_view_holder, parent, false)
         return DetailsFragmentViewHolder(view)
     }
 

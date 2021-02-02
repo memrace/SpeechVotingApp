@@ -15,10 +15,9 @@ class VotingViewModelFactory @Inject constructor(
     private val votingApi: IVotingService,
     private val catalogApi: ICatalogService,
     private val profileApi: IProfileService,
-    private val authService: AuthorizationService,
     private val userManager: IUserManager
 ) : ViewModelProvider.AndroidViewModelFactory(application) {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return VotingViewModel(application, votingApi, catalogApi, profileApi, authService, userManager) as T
+        return VotingViewModel(application, votingApi, catalogApi, profileApi, userManager) as T
     }
 }

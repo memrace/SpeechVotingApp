@@ -27,7 +27,7 @@ class VotingAddSpeechAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddSpeechViewHolder {
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.add_speech_to_voting_view_holder, parent, false)
+        val view = inflater.inflate(R.layout.voting_add_speech_to_voting_view_holder, parent, false)
         return AddSpeechViewHolder(view)
     }
 

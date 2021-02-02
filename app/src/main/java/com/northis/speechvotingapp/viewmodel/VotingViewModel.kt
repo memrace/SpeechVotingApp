@@ -1,6 +1,7 @@
 package com.northis.speechvotingapp.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
@@ -14,7 +15,7 @@ import com.northis.speechvotingapp.network.IVotingService
 import kotlinx.coroutines.Dispatchers
 import java.util.*
 
-// TODO СДЕЛАТЬ РЕСУРС-КЛАСС, ОБРАБОТКА ОШИБОК.
+// TODO СДЕЛАТЬ ФАСАД, ОБРАБОТКА ОШИБОК.
 class VotingViewModel(
     private val context: Context,
     private val votingApi: IVotingService,
@@ -39,31 +40,32 @@ class VotingViewModel(
 
     fun getVotingList() = liveData(Dispatchers.IO) {
         val data = votingApi.getVotingList().body()
+        Log.d("Votings", data.toString())
         emit(data)
     }
 
     fun getVoting() = liveData(Dispatchers.IO) {
         val data = votingApi.getVoting(voting.VotingId.toString()).body()
+        Log.d("Voting", data.toString())
         emit(data)
     }
 
     fun getWinner() = liveData(Dispatchers.IO) {
         val data = votingApi.getWinner(voting.VotingId.toString()).body()
+        Log.d("Winner", data.toString())
         emit(data)
     }
 
     fun addSpeechToVoting(speechId: String) = liveData(Dispatchers.IO) {
         val response = votingApi.addSpeech(voting.VotingId.toString(), speechId)
-        if (response.isSuccessful) {
-            emit(response)
-        }
+        emit(response)
+
     }
 
     fun addVote(speechId: String) = liveData(Dispatchers.IO) {
         val response = votingApi.addVote(voting.VotingId.toString(), UserVote(speechId, _userId))
-        if (response.isSuccessful) {
-            emit(response)
-        }
+        emit(response)
+
     }
 
     fun removeVote() = liveData(Dispatchers.IO) {
@@ -79,13 +81,13 @@ class VotingViewModel(
     }
 
     fun loadSpeeches() = liveData(Dispatchers.IO) {
-        val data =
-            catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString()).body()
+        val data = catalogApi.getSpeeches("theme", status = SpeechStatus.InCatalog.toString()).body()
+        Log.d("Speeches", data.toString())
         emit(data)
     }
     fun setExecutor(speechDate: Date) = liveData(Dispatchers.IO){
         if (speechWinnerId != null){
-            val data = catalogApi.changeSpeechExecutor(speechWinnerId!!, _userId, speechDate).code()
+            val data = catalogApi.changeSpeechExecutor(speechWinnerId!!, _userId, speechDate)
             emit(data)
         }
 
